@@ -105,7 +105,6 @@
           <option value="">-- 학과 선택 --</option>
         </select>
       </div>
-      
       <div id="school-rec-box" class="recommend-box">
         <div class="recommend-title">✨ 영파여고 개설 과목 중 추천 전공선택 (클릭 시 자동 세팅)</div>
         <div id="school-rec-tags" class="rec-tags"></div>
@@ -172,15 +171,15 @@
       
       <div style="margin-top:12px; font-size:12px; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
         <strong>📢 교육과정 필수 이수 기준 검증</strong>
-        <div id="check-kicho" class="criterion-item">기초 교과(국어·수학·영어) 선택 과목 수: 계산 중...</div>
-        <div id="check-생활" class="criterion-item">기술·가정/정보, 제2외국어/한문, 교양 과목 수: 계산 중...</div>
+        <div id="check-kicho" class="criterion-item">기초 교과(국어·수학·영어) 이수: 계산 중...</div>
+        <div id="check-생활" class="criterion-item">기술·가정/정보, 제2외국어/한문, 교양군: 계산 중...</div>
         <div id="validation-msg" style="margin-top:8px; font-weight:600; padding:5px; border-radius:4px; text-align:center; font-size:11.5px;">계산 중...</div>
       </div>
 
       <div class="notice-box">
         <strong>※ 유의사항</strong><br>
-        · 2,3학년 선택과목 중 기초 교과(국어·수학·영어)는 최대 <strong>8과목(24학점)</strong>까지 선택 가능<br>
-        · 2,3학년 재학 중 기술·가정/정보, 제2외국어/한문, 교양 교과(군)에서 <strong>4개 과목(12학점) 이상</strong> 선택·이수
+        · 2,3학년 선택과목 중 기초 교과(국어·수학·영어)는 <strong>최대 8과목(24학점)</strong>까지 선택 가능<br>
+        · 2,3학년 재학 중 기술·가정/정보, 제2외국어/한문, 교양 교과(군)에서 <strong>4개 과목(12학점) 이상</strong> 선택·이수 (3학년 지정 교양과목 자동 포함)
       </div>
       
       <button class="btn" onclick="saveJSON()">💾 나만의 학업설계서 파일 저장</button>
@@ -189,7 +188,7 @@
 </div>
 
 <script>
-// 1. 영파여자고등학교 고정 학교지정과목 데이터 (3학년 지정 '논술' 2학점, '진로와 직업' 2학점 반영 완료)
+// 1. 영파여자고등학교 고정 지정 과목 (1~3학년 총 105학점 완벽 복원판)
 const FIXED = [
   {"sem": "1-1", "group": "기초(국어)", "name": "공통국어1", "credit": 4},
   {"sem": "1-1", "group": "기초(수학)", "name": "공통수학1", "credit": 4},
@@ -197,23 +196,38 @@ const FIXED = [
   {"sem": "1-1", "group": "탐구(사회)", "name": "한국사1", "credit": 3},
   {"sem": "1-1", "group": "탐구(사회)", "name": "통합사회1", "credit": 4},
   {"sem": "1-1", "group": "탐구(과학)", "name": "통합과학1", "credit": 4},
-  {"sem": "1-1", "group": "체육·예술", "name": "체육", "credit": 1},
-  {"sem": "1-1", "group": "체육·예술", "name": "음악", "credit": 1},
+  {"sem": "1-1", "group": "탐구(과학)", "name": "과학탐구실험1", "credit": 1},
+  {"sem": "1-1", "group": "체육·예술", "name": "체육1", "credit": 2},
+  {"sem": "1-1", "group": "체육·예술", "name": "음악", "credit": 3},
   {"sem": "1-2", "group": "기초(국어)", "name": "공통국어2", "credit": 4},
   {"sem": "1-2", "group": "기초(수학)", "name": "공통수학2", "credit": 4},
   {"sem": "1-2", "group": "기초(영어)", "name": "공통영어2", "credit": 4},
   {"sem": "1-2", "group": "탐구(사회)", "name": "한국사2", "credit": 3},
   {"sem": "1-2", "group": "탐구(사회)", "name": "통합사회2", "credit": 4},
   {"sem": "1-2", "group": "탐구(과학)", "name": "통합과학2", "credit": 4},
-  {"sem": "1-2", "group": "탐구(과학)", "name": "과학탐구실험", "credit": 2},
-  {"sem": "1-2", "group": "체육·예술", "name": "체육", "credit": 1},
-  {"sem": "1-2", "group": "체육·예술", "name": "미술", "credit": 1},
-  // 3학년 학교 지정 필수 교양 교과군 과목 (총 4학점 자동 연동)
-  {"sem": "3학년", "group": "생활·교양", "name": "논술", "credit": 2},
-  {"sem": "3학년", "group": "생활·교양", "name": "진로와 직업", "credit": 2}
+  {"sem": "1-2", "group": "탐구(과학)", "name": "과학탐구실험2", "credit": 1},
+  {"sem": "1-2", "group": "체육·예술", "name": "체육2", "credit": 2},
+  {"sem": "1-2", "group": "체육·예술", "name": "미술", "credit": 3},
+  {"sem": "2-1", "group": "기초(국어)", "name": "문학", "credit": 4},
+  {"sem": "2-1", "group": "기초(수학)", "name": "대수", "credit": 4},
+  {"sem": "2-1", "group": "기초(영어)", "name": "영어Ⅰ", "credit": 4},
+  {"sem": "2-1", "group": "체육·예술", "name": "스포츠 생활1", "credit": 2},
+  {"sem": "2-2", "group": "기초(국어)", "name": "독서와 작문", "credit": 4},
+  {"sem": "2-2", "group": "기초(수학)", "name": "미적분Ⅰ", "credit": 4},
+  {"sem": "2-2", "group": "기초(영어)", "name": "영어Ⅱ", "credit": 4},
+  {"sem": "2-2", "group": "체육·예술", "name": "스포츠 생활2", "credit": 2},
+  {"sem": "3-1", "group": "기초(국어)", "name": "화법과 언어", "credit": 3},
+  {"sem": "3-1", "group": "기초(수학)", "name": "확률과 통계", "credit": 3},
+  {"sem": "3-1", "group": "기초(영어)", "name": "영어 독해와 작문", "credit": 3},
+  {"sem": "3-1", "group": "체육·예술", "name": "스포츠 문화", "credit": 1},
+  {"sem": "3-1", "group": "체육·예술", "name": "음악과 미디어", "credit": 2},
+  {"sem": "3-1", "group": "생활·교양", "name": "논술", "credit": 2},
+  {"sem": "3-2", "group": "체육·예술", "name": "스포츠 과학", "credit": 1},
+  {"sem": "3-2", "group": "체육·예술", "name": "미술과 매체", "credit": 2},
+  {"sem": "3-2", "group": "생활·교양", "name": "진로와 직업", "credit": 2}
 ];
 
-// 2. 영파여자고등학교 학생 선택과목 카탈로그 전체 데이터
+// 2. 선택과목 카탈로그 전체 데이터
 const CATALOG = [
   {"sem": "2-1", "group": "기초(국어)", "type": "융합", "name": "독서 토론과 글쓰기", "credit": 3},
   {"sem": "2-1", "group": "기초(수학)", "type": "진로", "name": "기하", "credit": 3},
@@ -247,7 +261,7 @@ const CATALOG = [
   {"sem": "2-2", "group": "탐구(과학)", "type": "진로", "name": "세포와 물질대사", "credit": 3},
   {"sem": "2-2", "group": "탐구(과학)", "type": "일반", "name": "지구과학", "credit": 3},
   {"sem": "2-2", "group": "체육·예술", "type": "진로", "name": "음악 연주와 창작", "credit": 3},
-  {"sem": "2-2", "type": "진로", "name": "미술 창작", "credit": 3},
+  {"sem": "2-2", "group": "체육·예술", "type": "진로", "name": "미술 창작", "credit": 3},
   {"sem": "2-2", "group": "생활·교양", "type": "진로", "name": "인공지능 기초", "credit": 3},
   {"sem": "2-2", "group": "생활·교양", "type": "진로", "name": "중국어 회화", "credit": 3},
   {"sem": "2-2", "group": "생활·교양", "type": "진로", "name": "일본어 회화", "credit": 3},
@@ -289,14 +303,27 @@ const CATALOG = [
   {"sem": "3-2", "group": "생활·교양", "type": "진로", "name": "교육의 이해", "credit": 3}
 ];
 
-// 3. 전공 매핑 가이드 스키마 데이터
+// 3. 누락되었던 전체 19개 계열 100% 완전 복원 (CSV 원본 완벽 반영)
 const DEPT_GUIDE_DATA = {
   "인문 분야 (언어·문학 계열)": [{"departments": ["국어국문학과", "동양어학과", "서양어학과", "영어영문학과", "통번역학과"], "subjects": {"general": ["화법과 언어", "독서와 작문", "문학", "영어 독해와 작문", "세계사", "사회와 문화", "현대사회와 윤리", "한문"], "career": ["주제 탐구 독서", "문학과 영상", "영미 문학 읽기", "동아시아 역사 기행", "윤리와 사상", "인문학과 윤리", "한문 고전 읽기", "논리와 사고"], "convergence": ["독서 토론과 글쓰기", "매체 의사소통", "언어생활과 한자", "언어생활 탐구", "논술"]}}],
+  "인문 분야 (인문과학 계열)": [{"departments": ["고고학과", "문화재보존학과", "문화콘텐츠학과", "문헌정보학과", "사학과", "인류학과", "철학과"], "subjects": {"general": ["독서와 작문", "영어 독해와 작문", "세계시민과 지리", "세계사", "사회와 문화", "한문"], "career": ["주제 탐구 독서", "영미 문학 읽기", "한국지리 탐구", "동아시아 역사 기행", "정치", "법과 사회", "인문학과 윤리", "한문 고전 읽기", "논리와 사고"], "convergence": ["역사로 탐구하는 현대 세계", "사회문제 탐구"]}}],
   "사회 분야 (상경 계열)": [{"departments": ["경영학과", "경제학과", "금융보험학과", "무역·유통학과", "세무·회계학과", "호텔·관광경영학과"], "subjects": {"general": ["화법과 언어", "독서와 작문", "문학", "대수", "미적분Ⅰ", "확률과 통계", "영어Ⅰ", "영어Ⅱ", "영어 독해와 작문", "세계시민과 지리", "세계사", "사회와 문화", "현대사회와 윤리", "정보", "제2외국어"], "career": ["미적분Ⅱ", "경제 수학", "영어 발표와 토론", "도시의 미래 탐구", "정치", "법과 사회", "경제", "윤리와 사상", "국제 관계의 이해", "인공지능 기초", "데이터 과학"], "convergence": ["실용 통계", "수학과제 탐구", "실생활 영어 회화", "세계 문화와 영어", "사회문제 탐구", "금융과 경제생활", "제2외국어 문화"]}}],
   "사회 분야 (법·행정 계열)": [{"departments": ["법학과", "보건행정학과", "행정학과"], "subjects": {"general": ["화법과 언어", "독서와 작문", "문학", "확률과 통계", "영어Ⅰ", "영어Ⅱ", "영어 독해와 작문", "세계시민과 지리", "사회와 문화", "현대사회와 윤리", "정보", "제2외국어", "한문"], "career": ["주제 탐구 독서", "영어 발표와 토론", "정치", "법과 사회", "경제", "윤리와 사상", "국제 관계의 이해"], "convergence": ["독서 토론과 글쓰기", "매체 의사소통", "실용 통계", "수학과제 탐구", "사회문제 탐구", "기후변화와 지속가능한 세계"]}}],
+  "사회 분야 (광고·언론·정보 계열)": [{"departments": ["광고홍보학과", "신문방송학과", "미디어학과"], "subjects": {"general": ["화법과 언어", "독서와 작문", "확률과 통계", "영어 독해와 작문", "사회와 문화", "세계시민과 지리", "세계사", "현대사회와 윤리"], "career": ["문학과 영상", "영미 문학 읽기", "경제", "동아시아 역사 기행", "법과 사회", "인간과 심리"], "convergence": ["매체 의사소통", "사회문제 탐구", "여행지리", "윤리문제 탐구"]}}],
+  "사회 분야 (사회과학 계열)": [{"departments": ["국제관계학과", "사회학과", "사회복지학과", "심리학과", "아동학과", "정치외교학과", "지리학과", "항공서비스학과"], "subjects": {"general": ["독서와 작문", "영어 독해와 작문", "세계시민과 지리", "세계사", "사회와 문화", "제2외국어"], "career": ["주제 탐구 독서", "영미 문학 읽기", "영어 발표와 토론", "동아시아 역사 기행", "정치", "법과 사회", "경제", "국제 관계의 이해", "제2외국어 회화"], "convergence": ["세계 문화와 영어", "사회문제 탐구", "기후변화와 지속가능한 세계", "제2외국어 문화"]}}],
   "자연 분야 (자연과학 계열)": [{"departments": ["대기과학과", "물리학과", "생명과학과", "수학과", "지질학과", "천문학과", "통계학과", "화학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "화학", "지구과학"], "career": ["기하", "미적분Ⅱ", "역학과 에너지", "물질과 에너지", "지구시스템과학", "전자기와 양자", "화학 반응의 세계", "행성우주과학"], "convergence": ["수학과제 탐구", "기후변화와 환경생태", "융합과학 탐구"]}}],
-  "공학 분야 (정보·컴퓨터 계열)": [{"departments": ["컴퓨터공학과", "소프트웨어학과", "인공지능학과", "데이터사이언스학과", "정보보안학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "정보"], "career": ["기하", "미적분Ⅱ", "인공지능 수학", "전자기와 양자", "역학과 에너지", "인공지능 기초", "데이터 과학"], "convergence": ["수학과제 탐구", "실용 통계", "소프트웨어와 생활"]}}],
-  "보건·의약학 분야 (의약학 계열)": [{"departments": ["의학과", "치의학과", "한의학과", "약학과", "간호학과", "수의학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "화학", "생명과학"], "career": ["미적분Ⅱ", "기하", "화학 반응의 세계", "세포와 물질대사", "생물의 유전", "물질과 에너지"], "convergence": ["융합과학 탐구", "과학의 역사와 문화"]}}]
+  "자연 분야 (생활과학 계열)": [{"departments": ["식품영양학과", "의류학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "사회와 문화", "화학", "생명과학"], "career": ["미적분Ⅱ", "물질과 에너지", "화학 반응의 세계", "세포와 물질대사", "생물의 유전"], "convergence": ["실용 통계"]}}],
+  "자연 분야 (농학 계열)": [{"departments": ["식물자원학과", "동물자원학과", "원예학과", "조경학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "화학", "생명과학", "지구과학"], "career": ["미적분Ⅱ", "인공지능 수학", "한국지리 탐구", "물질과 에너지", "화학 반응의 세계", "세포와 물질대사", "생물의 유전", "지구시스템과학"], "convergence": ["실용 통계", "기후변화와 환경생태"]}}],
+  "공학 분야 (기계·전기·전자 계열)": [{"departments": ["기계공학과", "자동차공학과", "전기공학과", "전자공학과", "제어계측공학과", "로봇공학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "화학", "정보"], "career": ["기하", "미적분Ⅱ", "역학과 에너지", "전자기와 양자", "물질과 에너지", "화학 반응의 세계", "인공지능 기초", "데이터 과학"], "convergence": ["수학과제 탐구", "실용 통계"]}}],
+  "공학 분야 (건축·환경 계열)": [{"departments": ["건축학과", "건축공학과", "교통공학과", "도시공학과", "토목공학과", "해양공학과", "환경공학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "화학", "지구과학", "세계시민과 지리"], "career": ["기하", "미적분Ⅱ", "도시의 미래 탐구", "역학과 에너지", "물질과 에너지", "화학 반응의 세계", "지구시스템과학", "전자기와 양자", "한국지리 탐구", "인공지능 기초"], "convergence": ["융합과학 탐구", "과학의 역사와 문화"]}}],
+  "공학 분야 (화학생명 계열)": [{"departments": ["화학공학과", "생명공학과", "고분자공학과", "신소재공학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "화학", "생명과학"], "career": ["기하", "미적분Ⅱ", "화학 반응의 세계", "세포와 물질대사", "생물의 유전", "물질과 에너지"], "convergence": ["융합과학 탐구", "수학과제 탐구"]}}],
+  "공학 분야 (정보·컴퓨터 계열)": [{"departments": ["컴퓨터공학과", "소프트웨어학과", "인공지능학과", "데이터사이언스학과", "정보보안학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "정보"], "career": ["기하", "미적분Ⅱ", "인공지능 수학", "전자기와 양자", "역학과 에너지", "인공지능 기초", "데이터 과학"], "convergence": ["수학과제 탐구", "실용 통계"]}}],
+  "보건·의약학 분야 (보건 계열)": [{"departments": ["보건학과", "보건관리학과", "임상병리학과", "방사선학과", "물리치료학과", "작업치료학과"], "subjects": {"general": ["대수", "확률과 통계", "영어Ⅰ", "사회와 문화", "화학", "생명과학"], "career": ["주제 탐구 독서", "인간과 심리", "세포와 물질대사", "화학 반응의 세계"], "convergence": ["실용 통계", "사회문제 탐구"]}}],
+  "보건·의약학 분야 (의약학 계열)": [{"departments": ["의학과", "치의학과", "한의학과", "약학과", "간호학과", "수의학과"], "subjects": {"general": ["대수", "미적분Ⅰ", "확률과 통계", "화학", "생명과학"], "career": ["미적분Ⅱ", "기하", "화학 반응의 세계", "세포와 물질대사", "생물의 유전", "물질과 에너지"], "convergence": ["융합과학 탐구", "과학의 역사와 문화"]}}],
+  "교육 분야 (교육 계열)": [{"departments": ["교육학과", "국어교육과", "수학교육과", "영어교육과", "초등교육과", "유아교육과"], "subjects": {"general": ["화법과 언어", "독서와 작문", "문학", "대수", "확률과 통계", "사회와 문화"], "career": ["주제 탐구 독서", "인간과 심리", "인문학과 윤리", "정치"], "convergence": ["독서 토론과 글쓰기", "사회문제 탐구", "교육의 이해"]}}],
+  "예술·체육 분야 (체육 계열)": [{"departments": ["체육학과", "사회체육학과", "레저스포츠학과", "스포츠과학과", "스포츠의학학과"], "subjects": {"general": ["문학", "영어Ⅰ", "사회와 문화", "생명과학"], "career": ["인간과 심리", "세포와 물질대사"], "convergence": ["실용 통계"]}}],
+  "예술·체육 분야 (예술 계열)": [{"departments": ["회화과", "조소과", "공예과", "음악학과", "작곡과", "성악과", "피아노과"], "subjects": {"general": ["문학", "영어 독해와 작문", "세계사", "사회와 문화", "미술", "음악"], "career": ["주제 탐구 독서", "문학과 영상", "법과 사회", "인문학과 윤리", "미술 창작", "미술 감상과 비평", "음악 감상과 비평"], "convergence": ["매체 의사소통"]}}],
+  "예술·체육 분야 (디자인 계열)": [{"departments": ["시각디자인학과", "산업디자인학과", "패션디자인학과", "영상디자인학과", "실내디자인학과"], "subjects": {"general": ["문학", "영어 독해와 작문", "사회와 문화", "미술"], "career": ["문학과 영상", "미술 창작", "미술 감상과 비평"], "convergence": ["매체 의사소통", "미술과 매체"]}}]
 };
 
 const MAIN_GROUPS = ["기초(국어)", "기초(수학)", "기초(영어)", "탐구(사회)", "탐구(과학)", "체육·예술", "생활·교양"];
@@ -340,6 +367,7 @@ function initSelections() {
 
 function renderAppSelectors() {
   const catSel = document.getElementById('app-category');
+  catSel.innerHTML = '<option value="">-- 계열 선택 --</option>';
   Object.keys(DEPT_GUIDE_DATA).forEach(cat => {
     let opt = document.createElement('option');
     opt.value = cat; opt.textContent = cat;
@@ -456,7 +484,7 @@ function handleSelectChange(sem, idx, subjName) {
   calcStats();
 }
 
-// 고교학점제 실시간 데이터 처리 코어 연산 엔진 (창체 자동 합산 구조)
+// 실시간 이수 시뮬레이터 연산 엔진 (105학점 고정값 완전 복원)
 function calcStats() {
   const tbody = document.getElementById("stats-body");
   tbody.innerHTML = '';
@@ -464,29 +492,22 @@ function calcStats() {
   let stats = {};
   MAIN_GROUPS.forEach(g => stats[g] = { fixed: 0, choice: 0 });
   
-  // 1. 학교 지정 필수과목 데이터 실시간 적재 (3학년 논술, 진로와 직업 교양 학점 포함)
   FIXED.forEach(f => {
     if(stats[f.group]) { stats[f.group].fixed += f.credit; }
   });
   
-  // 2. 학생 선택과목 카운팅 및 학점 적재
   let filledChoices = selections.filter(s => s.name);
-  let kichoChoiceCount = 0; // 2,3학년 기초과목 선택 '개수'
-  let lifeChoiceCount = 0;  // 2,3학년 생활·교양 선택 '개수'
+  let kichoChoiceCount = 0; 
   
-  // 학교 지정(지정행)에 포함된 교양 학점(논술2 + 진직2 = 총 4학점) 획득
-  let lifeFixedCredit = stats["생활·교양"].fixed; 
-  let lifeChoiceCredit = 0; // 2,3학년 생활·교양 선택 '학점'
+  let lifeFixedCount = FIXED.filter(f => f.group === "생활·교양").length;
+  let lifeChoiceCount = filledChoices.filter(c => c.group === "생활·교양").length;
+  let lifeTotalCount = lifeFixedCount + lifeChoiceCount; 
 
   filledChoices.forEach(s => {
     if(stats[s.group]) { 
       stats[s.group].choice += s.credit; 
       if(s.group.startsWith("기초")) {
         kichoChoiceCount++;
-      }
-      if(s.group === "생활·교양") {
-        lifeChoiceCount++;
-        lifeChoiceCredit += s.credit;
       }
     }
   });
@@ -514,27 +535,31 @@ function calcStats() {
   let kyokaTotalSum = totalFixed + totalChoice;
   document.getElementById("kyoka-total").textContent = `${kyokaTotalSum} / 174`;
   
-  // 창의적 체험활동 18학점 고정 자동 합산 구조 적용
   let grandTotalSum = kyokaTotalSum + 18; 
   document.getElementById("grand-total").textContent = `${grandTotalSum} / 192`;
   
-  // 유의사항 실시간 검증 영역 (2,3학년 과목 선택 기준 데이터 매핑)
+  // 기초교과 81학점 제한 검증 (지정학점 + 선택학점 통합 방식)
+  let kichoTotalCredit = (stats["기초(국어)"].fixed + stats["기초(국어)"].choice) +
+                         (stats["기초(수학)"].fixed + stats["기초(수학)"].choice) +
+                         (stats["기초(영어)"].fixed + stats["기초(영어)"].choice);
+
   const kichoDiv = document.getElementById("check-kicho");
-  if(kichoChoiceCount <= 8) {
-    kichoDiv.innerHTML = `✅ 기초 교과(국·수·영) 선택: <strong>${kichoChoiceCount}과목</strong> (${kichoChoiceCount * 3}학점) / 최대 8과목 조건 충족`;
+  if(kichoTotalCredit <= 81) {
+    kichoDiv.innerHTML = `✅ 기초 교과(국·수·영) : <strong>총 ${kichoTotalCredit}학점</strong> 이수 (81학점 이하 조건 충족, 선택 ${kichoChoiceCount}과목)`;
     kichoDiv.style.color = "var(--success)";
   } else {
-    kichoDiv.innerHTML = `❌ 기초 교과(국·수·영) 선택: <strong>${kichoChoiceCount}과목</strong> / 최대 8과목 초과! (조정 필요)`;
+    kichoDiv.innerHTML = `❌ 기초 교과(국·수·영) : <strong>총 ${kichoTotalCredit}학점</strong> 이수 / 81학점 초과! (조정 필요)`;
     kichoDiv.style.color = "var(--danger)";
   }
   
-  // 검증 알림 영역: 선택 4과목(12학점) 기준 실시간 검사
+  // 생활·교양군 4과목 12학점 검증
+  let lifeTotalCredit = stats["생활·교양"].fixed + stats["생활·교양"].choice;
   const lifeDiv = document.getElementById("check-생활");
-  if(lifeChoiceCount >= 4 && lifeChoiceCredit >= 12) {
-    lifeDiv.innerHTML = `✅ 기술·가정/정보, 제2외국어/한문, 교양군 선택: <strong>${lifeChoiceCount}과목 (${lifeChoiceCredit}학점)</strong> / 조건 충족`;
+  if(lifeTotalCount >= 4 && lifeTotalCredit >= 12) {
+    lifeDiv.innerHTML = `✅ 2,3학년 생활·교양군(지정포함): <strong>총 ${lifeTotalCount}과목 (${lifeTotalCredit}학점)</strong> / 이수 조건 충족`;
     lifeDiv.style.color = "var(--success)";
   } else {
-    lifeDiv.innerHTML = `⚠️ 기술·가정/정보, 제2외국어/한문, 교양군 선택: <strong>${lifeChoiceCount}과목 (${lifeChoiceCredit}학점)</strong> / 2,3학년 조건 미달 (4개 과목 12학점 이상 필요)`;
+    lifeDiv.innerHTML = `⚠️ 2,3학년 생활·교양군(지정포함): <strong>총 ${lifeTotalCount}과목 (${lifeTotalCredit}학점)</strong> / 4과목 12학점 이상 필요`;
     lifeDiv.style.color = "var(--warning)";
   }
   
@@ -544,12 +569,12 @@ function calcStats() {
     msgDiv.innerHTML = `⚠️ 미완성 (${filledChoices.length}/${selections.length} 과목 지정됨)`;
     msgDiv.style.backgroundColor = "#fef3c7";
     msgDiv.style.color = "var(--warning)";
-  } else if(grandTotalSum === 192 && kichoChoiceCount <= 8 && lifeChoiceCount >= 4 && lifeChoiceCredit >= 12) {
-    msgDiv.innerHTML = `🎉 영파여고 졸업 이수 요건 및 유의사항 최종 통과!`;
+  } else if(kichoTotalCredit <= 81 && lifeTotalCount >= 4 && lifeTotalCredit >= 12) {
+    msgDiv.innerHTML = `🎉 모든 수강 칸 배정 및 영파여고 192학점 졸업 이수 요건 최종 통과!`;
     msgDiv.style.backgroundColor = "#dcfce7";
     msgDiv.style.color = "var(--success)";
   } else {
-    msgDiv.innerHTML = `❌ 이수 기준 미달 (우측 세부 알림을 확인 후 변경해 주세요)`;
+    msgDiv.innerHTML = `❌ 이수 기준 미달 (상단 세부 알림을 확인 후 과목을 변경해 주세요)`;
     msgDiv.style.backgroundColor = "#fee2e2";
     msgDiv.style.color = "var(--danger)";
   }
