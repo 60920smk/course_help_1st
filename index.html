@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>영파여자고등학교 1학년 맞춤형 진로&과목선택 도우미 시스템</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root {
+    --primary: #1e3a8a;
+    --primary-light: #2563eb;
+    --secondary: #0d9488;
+    --bg: #f3f4f6;
+    --card-bg: #ffffff;
+    --border: #d1d5db;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: "맑은 고딕","Malgun Gothic",Pretendard,sans-serif; margin:0; padding:16px; background:var(--bg); color:#111827; }
+  
+  .app-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; text-align: center;
+  }
+  .app-header h1 { font-size: 22px; margin: 0 0 6px; }
+  .app-header p { font-size: 13px; opacity: 0.9; margin: 0; }
+
+  h2 { font-size:15px; margin:14px 0 6px; padding-bottom:4px; border-bottom:2px solid var(--primary-light); color:var(--primary); }
+  .layout { display:grid; grid-template-columns: 1fr 380px; gap:14px; }
+  @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } }
+  
+  .panel { background:#fff; border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom: 14px; }
+  
+  /* 스마트 필터 섹션 */
+  .filter-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
+  .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; }
+  
+  .recommend-box { margin-top: 12px; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; display: none; }
+  .recommend-title { font-size: 13px; font-weight: bold; color: var(--secondary); margin-bottom: 6px; }
+  .rec-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rec-tag {
+    font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #e0f2fe; color: #0369a1; 
+    border: 1px solid #bae6fd; cursor: pointer; transition: all 0.2s;
+  }
+  .rec-tag:hover { background: var(--secondary); color: white; border-color: var(--secondary); }
+
+  /* 기존 UI 스타일 유지 및 보완 */
+  .student-info { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .student-info input { padding:6px; border:1px solid var(--border); border-radius:4px; font-size:13px; }
+  .grid-sem { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
+  .sem-card { background:#fafafa; border:1px solid #e5e7eb; border-radius:6px; padding:10px; }
+  .sem-card h3 { font-size:13px; margin:0 0 8px; color:#374151; background:#e5e7eb; padding:4px 8px; border-radius:4px; }
+  
+  .row-item { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:4px 0; border-bottom:1px dashed #f3f4f6; }
+  .row-item.fixed-row { color:#6b7280; }
+  
+  table { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
+  th, td { border:1px solid var(--border); padding:6px; text-align:center; }
+  th { background:#f9fafb; font-weight:600; }
+  .num { text-align:right; }
+  .btn { width:100%; padding:10px; background:var(--primary-light); color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer; margin-top:8px; }
+  .btn:hover { background:var(--primary); }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>영파여고 2022 개정 교육과정 진로 설계 시스템</h1>
+  <p>학과 맞춤형 가이드라인과 영파여고 실제 과목배당표가 결합된 모의 수강신청 프로그램입니다.</p>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="panel">
+      <h2>👤 학생 인적 사항 및 진로 희망</h2>
+      <div class="student-info">
+        <input type="text" id="className" placeholder="반" style="width:50px;">
+        <input type="text" id="studentNum" placeholder="번호" style="width:60px;">
+        <input type="text" id="studentName" placeholder="이름" style="width:90px;">
+        <input type="text" id="careerPath" placeholder="희망진로 / 타겟 학과" style="flex:1; min-width:160px;">
+      </div>
+    </div>
+
+    <div class="panel filter-box">
+      <h2>💡 2022 개정 교육과정 학과 맞춤형 내비게이터</h2>
+      <p style="font-size:12px; color:#475569; margin: 4px 0 0 0;">희망하는 계열과 전공을 선택하면, 영파여고에 개설된 과목 중 최적의 교과목을 즉시 매칭해 줍니다.</p>
+      <div class="filter-grid">
+        <select id="app-category" onchange="syncDepts()">
+          <option value="">-- 계열 선택 --</option>
+        </select>
+        <select id="app-dept" onchange="filterSchoolSubjects()" disabled>
+          <option value="">-- 학과 선택 --</option>
+        </select>
+      </div>
+      
+      <div id="school-rec-box" class="recommend-box">
+        <div class="recommend-title">✨ 영파여고 개설 과목 중 추천 전공선택 (클릭 시 자동배정)</div>
+        <div id="school-rec-tags" class="rec-tags"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>🗓️ 학기별 학생 선택과목 설계 (2학년 ~ 3학년)</h2>
+      <div class="grid-sem">
+        <div class="sem-card">
+          <h3>2학년 1학기 (선택 4과목)</h3>
+          <div id="sem-2-1"></div>
+        </div>
+        <div class="sem-card">
+          <h3>2학년 2학기 (선택 4과목)</h3>
+          <div id="sem-2-2"></div>
+        </div>
+        <div class="sem-card">
+          <h3>3학년 1학기 (선택 5과목)</h3>
+          <div id="sem-3-1"></div>
+        </div>
+        <div class="sem-card">
+          <h3>3학년 2학기 (선택 5과목)</h3>
+          <div id="sem-3-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel" style="position: sticky; top: 16px;">
+      <h2>📊 이수 학점 실시간 시뮬레이터</h2>
+      <table>
+        <thead>
+          <tr><th>교과군</th><th>선택수</th><th>이수학점</th></tr>
+        </thead>
+        <tbody id="stats-body"></tbody>
+      </table>
+      
+      <div style="margin-top:12px; font-size:12px; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+        <strong>📢 고교학점제 졸업 자격 평가</strong>
+        <div id="validation-msg" style="margin-top:4px; font-weight:600; color:#dc2626;">계산 중...</div>
+      </div>
+      
+      <button class="btn" onclick="saveJSON()">💾 나만의 학업설계서 파일 저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 1. 영파여자고등학교 고유 지정 필수과목 데이터 (고정값)
+const FIXED = [
+  {"sem": "1-1", "group": "국 어", "type": "공통", "name": "공통국어1", "credit": 4},
+  {"sem": "1-1", "group": "수 학", "type": "공통", "name": "공통수학1", "credit": 4},
+  {"sem": "1-1", "group": "영 어", "type": "공통", "name": "공통영어1", "credit": 4},
+  {"sem": "1-1", "group": "사 회", "type": "공통", "name": "한국사1", "credit": 3},
+  {"sem": "1-1", "group": "사 회", "type": "공통", "name": "통합사회1", "credit": 4},
+  {"sem": "1-1", "group": "과 학", "type": "공통", "name": "통합과학1", "credit": 4},
+  {"sem": "1-1", "group": "체 육", "type": "일반", "name": "체육", "credit": 1},
+  {"sem": "1-1", "group": "예 술", "type": "일반", "name": "음악", "credit": 1},
+  {"sem": "1-1", "group": "기술∙가정/정보", "type": "공통", "name": "정보1", "credit": 2},
+  {"sem": "1-2", "group": "국 어", "type": "공통", "name": "공통국어2", "credit": 4},
+  {"sem": "1-2", "group": "수 학", "type": "공통", "name": "공통수학2", "credit": 4},
+  {"sem": "1-2", "group": "영 어", "type": "공통", "name": "공통영어2", "credit": 4},
+  {"sem": "1-2", "group": "사 회", "type": "공통", "name": "한국사2", "credit": 3},
+  {"sem": "1-2", "group": "사 회", "type": "공통", "name": "통합사회2", "credit": 4},
+  {"sem": "1-2", "group": "과 학", "type": "공통", "name": "통합과학2", "credit": 4},
+  {"sem": "1-2", "group": "과 학", "type": "공통", "name": "과학탐구실험", "credit": 2},
+  {"sem": "1-2", "group": "체 육", "type": "일반", "name": "체육", "credit": 1},
+  {"sem": "1-2", "group": "예 술", "type": "일반", "name": "미술", "credit": 1}
+];
+
+// 2. 영파여자고등학교 실제 선택과목 배당표 데이터 (CATALOG)
+const CATALOG = [
+  {"sem": "2-1", "group": "국 어", "type": "융합", "name": "독서 토론과 글쓰기", "credit": 3},
+  {"sem": "2-1", "group": "수 학", "type": "진로", "name": "기하", "credit": 3},
+  {"sem": "2-1", "group": "영 어", "type": "진로", "name": "영미 문학 읽기", "credit": 3},
+  {"sem": "2-1", "group": "사 회", "type": "일반", "name": "세계시민과 지리", "credit": 3},
+  {"sem": "2-1", "group": "사 회", "type": "일반", "name": "세계사", "credit": 3},
+  {"sem": "2-1", "group": "사 회", "type": "일반", "name": "현대사회와 윤리", "credit": 3},
+  {"sem": "2-1", "group": "사 회", "type": "진로", "name": "정치", "credit": 3},
+  {"sem": "2-1", "group": "사 회", "type": "진로", "name": "법과 사회", "credit": 3},
+  {"sem": "2-1", "group": "과 학", "type": "일반", "name": "물리학", "credit": 3},
+  {"sem": "2-1", "group": "과 학", "type": "일반", "name": "화학", "credit": 3},
+  {"sem": "2-1", "group": "과 학", "type": "일반", "name": "생명과학", "credit": 3},
+  {"sem": "2-1", "group": "예 술", "type": "진로", "name": "음악 감상과 비평", "credit": 3},
+  {"sem": "2-1", "group": "예 술", "type": "진로", "name": "미술 감상과 비평", "credit": 3},
+  {"sem": "2-1", "group": "기술∙가정/정보", "type": "일반", "name": "정보", "credit": 3},
+  {"sem": "2-1", "group": "제2외국어/한문", "type": "일반", "name": "중국어", "credit": 3},
+  {"sem": "2-1", "group": "제2외국어/한문", "type": "일반", "name": "일본어", "credit": 3},
+  {"sem": "2-1", "group": "제2외국어/한문", "type": "일반", "name": "한문", "credit": 3},
+  
+  {"sem": "2-2", "group": "국 어", "type": "진로", "name": "문학과 영상", "credit": 3},
+  {"sem": "2-2", "group": "수 학", "type": "진로", "name": "인공지능 수학", "credit": 3},
+  {"sem": "2-2", "group": "영 어", "type": "진로", "name": "영어 발표와 토론", "credit": 3},
+  {"sem": "2-2", "group": "사 회", "type": "진로", "name": "한국지리 탐구", "credit": 3},
+  {"sem": "2-2", "group": "사 회", "type": "진로", "name": "도시의 미래 탐구", "credit": 3},
+  {"sem": "2-2", "group": "사 회", "type": "진로", "name": "동아시아 역사 기행", "credit": 3},
+  {"sem": "2-2", "group": "사 회", "type": "진로", "name": "윤리와 사상", "credit": 3},
+  {"sem": "2-2", "group": "사 회", "type": "일반", "name": "사회와 문화", "credit": 3},
+  {"sem": "2-2", "group": "사 회", "type": "진로", "name": "경제", "credit": 3},
+  {"sem": "2-2", "group": "과 학", "type": "진로", "name": "역학과 에너지", "credit": 3},
+  {"sem": "2-2", "group": "과 학", "type": "진로", "name": "화학 반응의 세계", "credit": 3},
+  {"sem": "2-2", "group": "과 학", "type": "진로", "name": "세포와 물질대사", "credit": 3},
+  {"sem": "2-2", "group": "과 학", "type": "일반", "name": "지구과학", "credit": 3},
+  {"sem": "2-2", "group": "예 술", "type": "진로", "name": "음악 연주와 창작", "credit": 3},
+  {"sem": "2-2", "group": "예 술", "type": "진로", "name": "미술 창작", "credit": 3},
+  {"sem": "2-2", "group": "기술∙가정/정보", "type": "진로", "name": "인공지능 기초", "credit": 3},
+  {"sem": "2-2", "group": "제2외국어/한문", "type": "진로", "name": "중국어 회화", "credit": 3},
+  {"sem": "2-2", "group": "제2외국어/한문", "type": "진로", "name": "일본어 회화", "credit": 3},
+  {"sem": "2-2", "group": "제2외국어/한문", "type": "진로", "name": "한문 고전 읽기", "credit": 3},
+  
+  {"sem": "3-1", "group": "국 어", "type": "진로", "name": "주제 탐구 독서", "credit": 3},
+  {"sem": "3-1", "group": "수 학", "type": "진로", "name": "미적분Ⅱ", "credit": 3},
+  {"sem": "3-1", "group": "수 학", "type": "진로", "name": "경제 수학", "credit": 3},
+  {"sem": "3-1", "group": "영 어", "type": "진로", "name": "심화 영어", "credit": 3},
+  {"sem": "3-1", "group": "사 회", "type": "융합", "name": "여행지리", "credit": 3},
+  {"sem": "3-1", "group": "사 회", "type": "융합", "name": "역사로 탐구하는 현대 세계", "credit": 3},
+  {"sem": "3-1", "group": "사 회", "type": "진로", "name": "인문학과 윤리", "credit": 3},
+  {"sem": "3-1", "group": "사 회", "type": "융합", "name": "사회문제 탐구", "credit": 3},
+  {"sem": "3-1", "group": "과 학", "type": "진로", "name": "전자기와 양자", "credit": 3},
+  {"sem": "3-1", "group": "과 학", "type": "진로", "name": "물질과 에너지", "credit": 3},
+  {"sem": "3-1", "group": "과 학", "type": "진로", "name": "생물의 유전", "credit": 3},
+  {"sem": "3-1", "group": "과 학", "type": "진로", "name": "지구시스템과학", "credit": 3},
+  {"sem": "3-1", "group": "기술∙가정/정보", "type": "진로", "name": "데이터 과학", "credit": 3},
+  {"sem": "3-1", "group": "제2외국어/한문", "type": "융합", "name": "중국 문화", "credit": 3},
+  {"sem": "3-1", "group": "제2외국어/한문", "type": "융합", "name": "일본 문화", "credit": 3},
+  {"sem": "3-1", "group": "제2외국어/한문", "type": "융합", "name": "언어생활과 한자", "credit": 3},
+  {"sem": "3-1", "group": "교 양", "type": "진로", "name": "보건", "credit": 3},
+  {"sem": "3-1", "group": "교 양", "type": "진로", "name": "인간과 심리", "credit": 3},
+  
+  {"sem": "3-2", "group": "국 어", "type": "융합", "name": "언어생활 탐구", "credit": 3},
+  {"sem": "3-2", "group": "수 학", "type": "융합", "name": "실용 통계", "credit": 3},
+  {"sem": "3-2", "group": "수 학", "type": "융합", "name": "수학과제 탐구", "credit": 3},
+  {"sem": "3-2", "group": "영 어", "type": "진로", "name": "심화 영어 독해와 작문", "credit": 3},
+  {"sem": "3-2", "group": "영 어", "type": "융합", "name": "세계 문화와 영어", "credit": 3},
+  {"sem": "3-2", "group": "사 회", "type": "융합", "name": "윤리문제 탐구", "credit": 3},
+  {"sem": "3-2", "group": "사 회", "type": "진로", "name": "국제 관계의 이해", "credit": 3},
+  {"sem": "3-2", "group": "사 회", "type": "융합", "name": "금융과 경제생활", "credit": 3},
+  {"sem": "3-2", "group": "사 회", "type": "융합", "name": "기후변화와 지속가능한 세계", "credit": 3},
+  {"sem": "3-2", "group": "과 학", "type": "융합", "name": "융합과학 탐구", "credit": 3},
+  {"sem": "3-2", "group": "과 학", "type": "융합", "name": "과학의 역사와 문화", "credit": 3},
+  {"sem": "3-2", "group": "과 학", "type": "융합", "name": "기후변화와 환경생태", "credit": 3},
+  {"sem": "3-2", "group": "과 학", "type": "진로", "name": "행성우주과학", "credit": 3},
+  {"sem": "3-2", "group": "교 양", "type": "진로", "name": "인간과 철학", "credit": 3},
+  {"sem": "3-2", "group": "교 양", "type": "진로", "name": "교육의 이해", "credit": 3}
+];
+
+// 3. 교육청 전공 지침 빅데이터 연동 객체
+const DEPT_GUIDE_DATA = __DATA_PLACEHOLDER__;
+
+const ALL_GROUPS = ["국 어","수 학","영 어","사 회","과 학","체 육","예 술","기술∙가정/정보","제2외국어/한문","교 양"];
+const SEMESTERS = ["2-1","2-2","3-1","3-2"];
+let selections = [];
+
+// 앱 초기화 및 컴포넌트 렌더링
+window.onload = function() {
+  initSelections();
+  renderAppSelectors();
+  renderGrids();
+  calcStats();
+};
+
+function initSelections() {
+  SEMESTERS.forEach(sem => {
+    let limit = (sem.startsWith("2")) ? 4 : 5;
+    for(let i=0; i<limit; i++) {
+      selections.push({ sem: sem, idx: i, group: "", type: "", name: "", credit: 0 });
+    }
+  });
+}
+
+function renderAppSelectors() {
+  const catSel = document.getElementById('app-category');
+  Object.keys(DEPT_GUIDE_DATA).forEach(cat => {
+    let opt = document.createElement('option');
+    opt.value = cat; opt.textContent = cat;
+    catSel.appendChild(opt);
+  });
+}
+
+function syncDepts() {
+  const cat = document.getElementById('app-category').value;
+  const deptSel = document.getElementById('app-dept');
+  deptSel.innerHTML = '<option value="">-- 학과 선택 --</option>';
+  document.getElementById('school-rec-box').style.display = 'none';
+  
+  if(!cat) { deptSel.disabled = true; return; }
+  deptSel.disabled = false;
+  
+  let depts = new Set();
+  DEPT_GUIDE_DATA[cat].forEach(item => item.departments.forEach(d => depts.add(d)));
+  depts.add('자유전공학부');
+  
+  Array.from(depts).sort().forEach(d => {
+    let opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    deptSel.appendChild(opt);
+  });
+}
+
+// [핵심 로직] 교육청 추천 가이드 과목과 영파여고 실제 배당표(CATALOG) 간 교집합 추출 필터링
+function filterSchoolSubjects() {
+  const cat = document.getElementById('app-category').value;
+  const dept = document.getElementById('app-dept').value;
+  const tagContainer = document.getElementById('school-rec-tags');
+  const box = document.getElementById('school-rec-box');
+  
+  tagContainer.innerHTML = '';
+  if(!cat || !dept) { box.style.display = 'none'; return; }
+  
+  // 교육청 가이드에서 권장하는 전공 교과목 풀 추출
+  let guidePool = [];
+  DEPT_GUIDE_DATA[cat].forEach(item => {
+    if(dept === '자유전공학부' || item.departments.includes(dept)) {
+      guidePool = guidePool.concat(item.subjects.general || [], item.subjects.career || [], item.subjects.convergence || []);
+    }
+  });
+  guidePool = [...new Set(guidePool)].map(v => v.trim());
+
+  // 영파여고 실전 CATALOG 데이터 내에 존재하는 과목만 추출 (교집합 필터)
+  let schoolAvailableRec = CATALOG.filter(schoolSub => guidePool.some(gSub => gSub.includes(schoolSub.name) || schoolSub.name.includes(gSub)));
+  
+  // 중복 제거
+  let uniqueRecNames = [...new Set(schoolAvailableRec.map(s => s.name))];
+  
+  if(uniqueRecNames.length === 0) {
+    tagContainer.innerHTML = '<span style="font-size:12px; color:#64748b;">우리 학교 배당표 내 특이 지정 과목이 없습니다. 자유 선택이 권장됩니다.</span>';
+  } else {
+    uniqueRecNames.forEach(name => {
+      let span = document.createElement('span');
+      span.className = 'rec-tag';
+      span.textContent = `➕ ${name}`;
+      span.onclick = () => autoSelectSubject(name);
+      tagContainer.appendChild(span);
+    });
+  }
+  box.style.display = 'block';
+}
+
+function autoSelectSubject(subjName) {
+  // 학교 CATALOG에서 원본 과목 양식 획득
+  let template = CATALOG.find(s => s.name === subjName);
+  if(!template) return;
+  
+  // 적절한 학기 바구니에 자동 원클릭 세팅
+  let slot = selections.find(s => s.sem === template.sem && s.name === "");
+  if(!slot) {
+    alert(`${template.sem} 학기의 수강신청 칸이 가득 찼습니다. 기존 선택을 변경하거나 비워주세요.`);
+    return;
+  }
+  
+  slot.group = template.group;
+  slot.type = template.type;
+  slot.name = template.name;
+  slot.credit = template.credit;
+  
+  renderGrids();
+  calcStats();
+}
+
+function renderGrids() {
+  SEMESTERS.forEach(sem => {
+    const div = document.getElementById(`sem-${sem}`);
+    div.innerHTML = '';
+    let filtered = selections.filter(s => s.sem === sem);
+    
+    filtered.forEach(slot => {
+      const row = document.createElement('div');
+      row.className = 'row-item';
+      
+      let optionsHtml = `<option value="">-- 과목 선택 --</option>`;
+      CATALOG.filter(c => c.sem === sem).forEach(c => {
+        let selectedAttr = (slot.name === c.name) ? "selected" : "";
+        optionsHtml += `<option value="${c.name}" ${selectedAttr}>[${c.type}] ${c.name} (${c.credit}학점)</option>`;
+      });
+      
+      row.innerHTML = `
+        <span style="font-weight:600; color:var(--primary);">선택 ${slot.idx + 1}</span>
+        <select style="width:75%; padding:6px;" onchange="handleSelectChange('${sem}', ${slot.idx}, this.value)">
+          ${optionsHtml}
+        </select>
+      `;
+      div.appendChild(row);
+    });
+  });
+}
+
+function handleSelectChange(sem, idx, subjName) {
+  let slot = selections.find(s => s.sem === sem && s.idx === idx);
+  if(!subjName) {
+    slot.group = ""; slot.type = ""; slot.name = ""; slot.credit = 0;
+  } else {
+    let match = CATALOG.find(c => c.sem === sem && c.name === subjName);
+    if(match) {
+      slot.group = match.group; slot.type = match.type; slot.name = match.name; slot.credit = match.credit;
+    }
+  }
+  calcStats();
+}
+
+function calcStats() {
+  const tbody = document.getElementById("stats-body");
+  tbody.innerHTML = '';
+  
+  let stats = {};
+  ALL_GROUPS.forEach(g => stats[g] = { count: 0, credit: 0 });
+  
+  // 고정 기초 공통과목 합산
+  FIXED.forEach(f => {
+    if(stats[f.group]) { stats[f.group].count++; stats[f.group].credit += f.credit; }
+  });
+  
+  // 학생 맞춤형 커스텀 선택과목 합산
+  let filledChoices = selections.filter(s => s.name);
+  filledChoices.forEach(s => {
+    if(stats[s.group]) { stats[s.group].count++; stats[s.group].credit += s.credit; }
+  });
+  
+  let totalCredits = 0;
+  ALL_GROUPS.forEach(g => {
+    let row = document.createElement('tr');
+    row.innerHTML = `<td>${g}</td><td>${stats[g].count}</td><td class="num">${stats[g].credit}</td>`;
+    tbody.appendChild(row);
+    totalCredits += stats[g].credit;
+  });
+  
+  // 창의적 체험활동 기본 18학점 고정 가산
+  let finalTotal = totalCredits + 18;
+  
+  // 고교학점제 졸업 검증 로직 실행
+  const msgDiv = document.getElementById("validation-msg");
+  if(filledChoices.length < selections.length) {
+    msgDiv.innerHTML = `⚠️ 미완성 (${filledChoices.length}/${selections.length} 과목 선택됨). 과목을 모두 지정해 주세요.`;
+    msgDiv.style.color = "#d97706";
+  } else if(finalTotal < 192) {
+    msgDiv.innerHTML = `❌ 학점 부족 (총 ${finalTotal}학점 / 졸업 기준 192학점 미달)`;
+    msgDiv.style.color = "#dc2626";
+  } else {
+    msgDiv.innerHTML = `✅ 이수 성공! 졸업 조건 만족 (총 ${finalTotal}학점 이수 확정)`;
+    msgDiv.style.color = "#10b981";
+  }
+}
+
+function saveJSON() {
+  const studentData = {
+    학교명: "영파여자고등학교",
+    학년: 1,
+    반: document.getElementById("className").value,
+    번호: document.getElementById("studentNum").value,
+    이름: document.getElementById("studentName").value,
+    희망학과계열: document.getElementById("app-category").value + " -> " + document.getElementById("app-dept").value,
+    진로희망사유: document.getElementById("careerPath").value,
+    최종지정내역: selections.filter(s => s.name)
+  };
+  
+  const blob = new Blob([JSON.stringify(studentData, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `영파여고_1학년_교육과정설계서_${studentData.이름 || '미입력'}.json`;
+  a.click();
+}
+</script>
+</body>
+</html>
