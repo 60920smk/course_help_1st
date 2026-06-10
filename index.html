@@ -32,26 +32,27 @@
   /* 스마트 필터 섹션 */
   .filter-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
   .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
-  select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; }
+  select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; background-color: #fff; }
   
   .recommend-box { margin-top: 12px; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; display: none; }
   .recommend-title { font-size: 13px; font-weight: bold; color: var(--secondary); margin-bottom: 6px; }
   .rec-tags { display: flex; flex-wrap: wrap; gap: 6px; }
   .rec-tag {
     font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #e0f2fe; color: #0369a1; 
-    border: 1px solid #bae6fd; cursor: pointer; transition: all 0.2s;
+    border: 1px solid #bae6fd; cursor: pointer; transition: all 0.2s; font-weight: bold;
   }
   .rec-tag:hover { background: var(--secondary); color: white; border-color: var(--secondary); }
 
-  /* 기존 UI 스타일 유지 및 보완 */
+  /* 인적사항 드롭다운 */
   .student-info { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .student-info select { width: auto; min-width: 90px; padding:6px; border:1px solid var(--border); border-radius:4px; font-size:13px; }
   .student-info input { padding:6px; border:1px solid var(--border); border-radius:4px; font-size:13px; }
+  
   .grid-sem { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
   .sem-card { background:#fafafa; border:1px solid #e5e7eb; border-radius:6px; padding:10px; }
   .sem-card h3 { font-size:13px; margin:0 0 8px; color:#374151; background:#e5e7eb; padding:4px 8px; border-radius:4px; }
   
   .row-item { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:4px 0; border-bottom:1px dashed #f3f4f6; }
-  .row-item.fixed-row { color:#6b7280; }
   
   table { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
   th, td { border:1px solid var(--border); padding:6px; text-align:center; }
@@ -73,16 +74,21 @@
     <div class="panel">
       <h2>👤 학생 인적 사항 및 진로 희망</h2>
       <div class="student-info">
-        <input type="text" id="className" placeholder="반" style="width:50px;">
-        <input type="text" id="studentNum" placeholder="번호" style="width:60px;">
-        <input type="text" id="studentName" placeholder="이름" style="width:90px;">
+        <select id="gradeSelect">
+          <option value="">-- 학년 --</option>
+          <option value="1">1학년</option>
+          <option value="2">2학년</option>
+        </select>
+        <select id="classSelect"></select>
+        <select id="numSelect"></select>
+        <input type="text" id="studentName" placeholder="이름" style="width:100px;">
         <input type="text" id="careerPath" placeholder="희망진로 / 타겟 학과" style="flex:1; min-width:160px;">
       </div>
     </div>
 
     <div class="panel filter-box">
       <h2>💡 2022 개정 교육과정 학과 맞춤형 내비게이터</h2>
-      <p style="font-size:12px; color:#475569; margin: 4px 0 0 0;">희망하는 계열과 전공을 선택하면, 영파여고에 개설된 과목 중 최적의 교과목을 즉시 매칭해 줍니다.</p>
+      <p style="font-size:12px; color:#475569; margin: 4px 0 8px 0;">희망하는 계열과 전공을 선택하면, 영파여고에 개설된 과목 중 최적의 교과목을 즉시 매칭해 줍니다.</p>
       <div class="filter-grid">
         <select id="app-category" onchange="syncDepts()">
           <option value="">-- 계열 선택 --</option>
@@ -93,7 +99,7 @@
       </div>
       
       <div id="school-rec-box" class="recommend-box">
-        <div class="recommend-title">✨ 영파여고 개설 과목 중 추천 전공선택 (클릭 시 자동배정)</div>
+        <div class="recommend-title">✨ 영파여고 개설 과목 중 추천 전공선택 (클릭 시 자동 세팅)</div>
         <div id="school-rec-tags" class="rec-tags"></div>
       </div>
     </div>
@@ -102,11 +108,11 @@
       <h2>🗓️ 학기별 학생 선택과목 설계 (2학년 ~ 3학년)</h2>
       <div class="grid-sem">
         <div class="sem-card">
-          <h3>2학년 1학기 (선택 4과목)</h3>
+          <h3>2학년 1학기 (선택 5과목)</h3>
           <div id="sem-2-1"></div>
         </div>
         <div class="sem-card">
-          <h3>2학년 2학기 (선택 4과목)</h3>
+          <h3>2학년 2학기 (선택 5과목)</h3>
           <div id="sem-2-2"></div>
         </div>
         <div class="sem-card">
@@ -114,7 +120,7 @@
           <div id="sem-3-1"></div>
         </div>
         <div class="sem-card">
-          <h3>3학년 2학기 (선택 5과목)</h3>
+          <h3>3학년 2학기 (선택 8과목)</h3>
           <div id="sem-3-2"></div>
         </div>
       </div>
@@ -142,7 +148,7 @@
 </div>
 
 <script>
-// 1. 영파여자고등학교 고유 지정 필수과목 데이터 (고정값)
+// 1. 영파여자고등학교 1학년 공통 지정 필수과목 데이터
 const FIXED = [
   {"sem": "1-1", "group": "국 어", "type": "공통", "name": "공통국어1", "credit": 4},
   {"sem": "1-1", "group": "수 학", "type": "공통", "name": "공통수학1", "credit": 4},
@@ -164,7 +170,7 @@ const FIXED = [
   {"sem": "1-2", "group": "예 술", "type": "일반", "name": "미술", "credit": 1}
 ];
 
-// 2. 영파여자고등학교 실제 선택과목 배당표 데이터 (CATALOG)
+// 2. 영파여자고등학교 선택과목 풀 (CATALOG)
 const CATALOG = [
   {"sem": "2-1", "group": "국 어", "type": "융합", "name": "독서 토론과 글쓰기", "credit": 3},
   {"sem": "2-1", "group": "수 학", "type": "진로", "name": "기하", "credit": 3},
@@ -240,24 +246,127 @@ const CATALOG = [
   {"sem": "3-2", "group": "교 양", "type": "진로", "name": "교육의 이해", "credit": 3}
 ];
 
-// 3. 교육청 전공 지침 빅데이터 연동 객체
-const DEPT_GUIDE_DATA = __DATA_PLACEHOLDER__;
+// 3. 교육청 제공 학과 지침 원본 데이터 완전 내장 내포
+const DEPT_GUIDE_DATA = {
+  "인문 분야 (언어·문학 계열)": [{
+    "departments": ["국어국문학과", "동양어학과", "서양어학과", "영어영문학과", "통번역학과"],
+    "subjects": {
+      "general": ["화법과 언어", "독서와 작문", "문학", "영어 독해와 작문", "세계사", "사회와 문화", "현대사회와 윤리", "한문"],
+      "career": ["주제 탐구 독서", "문학과 영상", "영미 문학 읽기", "동아시아 역사 기행", "윤리와 사상", "인문학과 윤리", "한문 고전 읽기", "논리와 사고"],
+      "convergence": ["독서 토론과 글쓰기", "매체 의사소통", "언어생활과 한자", "언어생활 탐구", "논술"]
+    }
+  }],
+  "사회 분야 (상경 계열)": [{
+    "departments": ["경영학과", "경제학과", "금융보험학과", "무역·유통학과", "세무·회계학과", "호텔·관광경영학과"],
+    "subjects": {
+      "general": ["화법과 언어", "독서와 작문", "문학", "대수", "미적분Ⅰ", "확률과 통계", "영어Ⅰ", "영어Ⅱ", "영어 독해와 작문", "세계시민과 지리", "세계사", "사회와 문화", "현대사회와 윤리", "정보", "제2외국어"],
+      "career": ["미적분Ⅱ", "경제 수학", "영어 발표와 토론", "도시의 미래 탐구", "정치", "법과 사회", "경제", "윤리와 사상", "국제 관계의 이해", "인공지능 기초", "데이터 과학"],
+      "convergence": ["실용 통계", "수학과제 탐구", "실생활 영어 회화", "세계 문화와 영어", "사회문제 탐구", "금융과 경제생활", "제2외국어 문화"]
+    }
+  }],
+  "사회 분야 (법·행정 계열)": [{
+    "departments": ["법학과", "보건행정학과", "행정학과"],
+    "subjects": {
+      "general": ["화법과 언어", "독서와 작문", "문학", "확률과 통계", "영어Ⅰ", "영어Ⅱ", "영어 독해와 작문", "세계시민과 지리", "사회와 문화", "현대사회와 윤리", "정보", "제2외국어", "한문"],
+      "career": ["주제 탐구 독서", "영어 발표와 토론", "정치", "법과 사회", "경제", "윤리와 사상", "국제 관계의 이해"],
+      "convergence": ["독서 토론과 글쓰기", "매체 의사소통", "실용 통계", "수학과제 탐구", "사회문제 탐구", "기후변화와 지속가능한 세계"]
+    }
+  }],
+  "사회 분야 (광고·언론·정보 계열)": [{
+    "departments": ["광고홍보학과", "신문방송학과", "미디어학과"],
+    "subjects": {
+      "general": ["화법과 언어", "독서와 작문", "확률과 통계", "영어 독해와 작문", "사회와 문화", "세계시민과 지리", "세계사", "현대사회와 윤리"],
+      "career": ["문학과 영상", "영미 문학 읽기", "경제", "동아시아 역사 기행", "법과 사회", "인간과 심리"],
+      "convergence": ["매체 의사소통", "사회문제 탐구", "여행지리", "윤리문제 탐구"]
+    }
+  }],
+  "사회 분야 (사회과학 계열)": [{
+    "departments": ["국제관계학과", "사회학과", "사회복지학과", "심리학과", "아동학과", "정치외교학과", "지리학과", "항공서비스학과"],
+    "subjects": {
+      "general": ["독서와 작문", "영어 독해와 작문", "세계시민과 지리", "세계사", "사회와 문화", "제2외국어"],
+      "career": ["주제 탐구 독서", "영미 문학 읽기", "영어 발표와 토론", "동아시아 역사 기행", "정치", "법과 사회", "경제", "국제 관계의 이해", "제2외국어 회화"],
+      "convergence": ["세계 문화와 영어", "사회문제 탐구", "기후변화와 지속가능한 세계", "제2외국어 문화"]
+    }
+  }],
+  "자연 분야 (자연과학 계열)": [{
+    "departments": ["대기과학과", "물리학과", "생명과학과", "수학과", "지질학과", "천문학과", "통계학과", "화학과"],
+    "subjects": {
+      "general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "화학", "지구과학"],
+      "career": ["기하", "미적분Ⅱ", "역학과 에너지", "물질과 에너지", "지구시스템과학", "전자기와 양자", "화학 반응의 세계", "행성우주과학"],
+      "convergence": ["수학과제 탐구", "기후변화와 환경생태", "융합과학 탐구"]
+    }
+  }],
+  "공학 분야 (정보·컴퓨터 계열)": [{
+    "departments": ["컴퓨터공학과", "소프트웨어학과", "인공지능학과", "데이터사이언스학과", "정보보안학과"],
+    "subjects": {
+      "general": ["대수", "미적분Ⅰ", "확률과 통계", "물리학", "정보"],
+      "career": ["기하", "미적분Ⅱ", "인공지능 수학", "전자기와 양자", "역학과 에너지", "인공지능 기초", "데이터 과학"],
+      "convergence": ["수학과제 탐구", "실용 통계", "소프트웨어와 생활"]
+    }
+  }],
+  "보건·의약학 분야 (의약학 계열)": [{
+    "departments": ["의학과", "치의학과", "한의학과", "약학과", "간호학과", "수의학과"],
+    "subjects": {
+      "general": ["대수", "미적분Ⅰ", "확률과 통계", "화학", "생명과학"],
+      "career": ["미적분Ⅱ", "기하", "화학 반응의 세계", "세포와 물질대사", "생물의 유전", "물질과 에너지"],
+      "convergence": ["융합과학 탐구", "과학의 역사와 문화"]
+    }
+  }],
+  "교육 분야 (교육 계열)": [{
+    "departments": ["교육학과", "국어교육과", "수학교육과", "영어교육과", "초등교육과", "유아교육과"],
+    "subjects": {
+      "general": ["화법과 언어", "독서와 작문", "문학", "대수", "확률과 통계", "사회와 문화"],
+      "career": ["주제 탐구 독서", "인간과 심리", "인문학과 윤리", "정치"],
+      "convergence": ["독서 토론과 글쓰기", "사회문제 탐구", "교육의 이해"]
+    }
+  }],
+  "예술·체육 분야 (디자인 계열)": [{
+    "departments": ["시각디자인학과", "산업디자인학과", "패션디자인학과", "영상디자인학과", "실내디자인학과"],
+    "subjects": {
+      "general": ["문학", "영어 독해와 작문", "사회와 문화", "미술"],
+      "career": ["문학과 영상", "미술 창작", "미술 감상과 비평"],
+      "convergence": ["매체 의사소통", "미술과 매체"]
+    }
+  }]
+};
 
 const ALL_GROUPS = ["국 어","수 학","영 어","사 회","과 학","체 육","예 술","기술∙가정/정보","제2외국어/한문","교 양"];
 const SEMESTERS = ["2-1","2-2","3-1","3-2"];
 let selections = [];
 
-// 앱 초기화 및 컴포넌트 렌더링
 window.onload = function() {
+  initDropdowns(); // 인적사항 드롭다운 동적 생성 호출
   initSelections();
   renderAppSelectors();
   renderGrids();
   calcStats();
 };
 
+// 1~11반, 1~30번 동적 생성 루프 함수
+function initDropdowns() {
+  const classSel = document.getElementById('classSelect');
+  classSel.innerHTML = '<option value="">-- 반 --</option>';
+  for (let i = 1; i <= 11; i++) {
+    let opt = document.createElement('option');
+    opt.value = i; opt.textContent = i + '반';
+    classSel.appendChild(opt);
+  }
+
+  const numSel = document.getElementById('numSelect');
+  numSel.innerHTML = '<option value="">-- 번호 --</option>';
+  for (let i = 1; i <= 30; i++) {
+    let opt = document.createElement('option');
+    opt.value = i; opt.textContent = i + '번';
+    numSel.appendChild(opt);
+  }
+}
+
+// 영파여고 요청 단위 배당수 완전 구축 (2-1: 5개, 2-2: 5개, 3-1: 5개, 3-2: 8개)
 function initSelections() {
   SEMESTERS.forEach(sem => {
-    let limit = (sem.startsWith("2")) ? 4 : 5;
+    let limit = 5;
+    if (sem === "3-2") limit = 8; // 3학년 2학기만 8개 과목 지정 수용
+    
     for(let i=0; i<limit; i++) {
       selections.push({ sem: sem, idx: i, group: "", type: "", name: "", credit: 0 });
     }
@@ -284,7 +393,7 @@ function syncDepts() {
   
   let depts = new Set();
   DEPT_GUIDE_DATA[cat].forEach(item => item.departments.forEach(d => depts.add(d)));
-  depts.add('자유전공학부');
+  depts.add('자유전공학부'); // 요구사항 반영
   
   Array.from(depts).sort().forEach(d => {
     let opt = document.createElement('option');
@@ -293,7 +402,6 @@ function syncDepts() {
   });
 }
 
-// [핵심 로직] 교육청 추천 가이드 과목과 영파여고 실제 배당표(CATALOG) 간 교집합 추출 필터링
 function filterSchoolSubjects() {
   const cat = document.getElementById('app-category').value;
   const dept = document.getElementById('app-dept').value;
@@ -303,7 +411,6 @@ function filterSchoolSubjects() {
   tagContainer.innerHTML = '';
   if(!cat || !dept) { box.style.display = 'none'; return; }
   
-  // 교육청 가이드에서 권장하는 전공 교과목 풀 추출
   let guidePool = [];
   DEPT_GUIDE_DATA[cat].forEach(item => {
     if(dept === '자유전공학부' || item.departments.includes(dept)) {
@@ -312,14 +419,12 @@ function filterSchoolSubjects() {
   });
   guidePool = [...new Set(guidePool)].map(v => v.trim());
 
-  // 영파여고 실전 CATALOG 데이터 내에 존재하는 과목만 추출 (교집합 필터)
+  // 영파여고 교집합 매핑 검증
   let schoolAvailableRec = CATALOG.filter(schoolSub => guidePool.some(gSub => gSub.includes(schoolSub.name) || schoolSub.name.includes(gSub)));
-  
-  // 중복 제거
   let uniqueRecNames = [...new Set(schoolAvailableRec.map(s => s.name))];
   
   if(uniqueRecNames.length === 0) {
-    tagContainer.innerHTML = '<span style="font-size:12px; color:#64748b;">우리 학교 배당표 내 특이 지정 과목이 없습니다. 자유 선택이 권장됩니다.</span>';
+    tagContainer.innerHTML = '<span style="font-size:12px; color:#64748b;">영파여고 배당표 중 연관 과목이 없습니다. 자유롭게 배정해 주세요.</span>';
   } else {
     uniqueRecNames.forEach(name => {
       let span = document.createElement('span');
@@ -333,11 +438,9 @@ function filterSchoolSubjects() {
 }
 
 function autoSelectSubject(subjName) {
-  // 학교 CATALOG에서 원본 과목 양식 획득
   let template = CATALOG.find(s => s.name === subjName);
   if(!template) return;
   
-  // 적절한 학기 바구니에 자동 원클릭 세팅
   let slot = selections.find(s => s.sem === template.sem && s.name === "");
   if(!slot) {
     alert(`${template.sem} 학기의 수강신청 칸이 가득 찼습니다. 기존 선택을 변경하거나 비워주세요.`);
@@ -370,8 +473,8 @@ function renderGrids() {
       });
       
       row.innerHTML = `
-        <span style="font-weight:600; color:var(--primary);">선택 ${slot.idx + 1}</span>
-        <select style="width:75%; padding:6px;" onchange="handleSelectChange('${sem}', ${slot.idx}, this.value)">
+        <span style="font-weight:600; color:var(--primary); font-size:11px;">선택 ${slot.idx + 1}</span>
+        <select style="width:80%; padding:4px; font-size:12px;" onchange="handleSelectChange('${sem}', ${slot.idx}, this.value)">
           ${optionsHtml}
         </select>
       `;
@@ -400,12 +503,10 @@ function calcStats() {
   let stats = {};
   ALL_GROUPS.forEach(g => stats[g] = { count: 0, credit: 0 });
   
-  // 고정 기초 공통과목 합산
   FIXED.forEach(f => {
     if(stats[f.group]) { stats[f.group].count++; stats[f.group].credit += f.credit; }
   });
   
-  // 학생 맞춤형 커스텀 선택과목 합산
   let filledChoices = selections.filter(s => s.name);
   filledChoices.forEach(s => {
     if(stats[s.group]) { stats[s.group].count++; stats[s.group].credit += s.credit; }
@@ -419,19 +520,17 @@ function calcStats() {
     totalCredits += stats[g].credit;
   });
   
-  // 창의적 체험활동 기본 18학점 고정 가산
-  let finalTotal = totalCredits + 18;
+  let finalTotal = totalCredits + 18; // 창체이수 기본값 18학점 고정 가산
   
-  // 고교학점제 졸업 검증 로직 실행
   const msgDiv = document.getElementById("validation-msg");
   if(filledChoices.length < selections.length) {
-    msgDiv.innerHTML = `⚠️ 미완성 (${filledChoices.length}/${selections.length} 과목 선택됨). 과목을 모두 지정해 주세요.`;
+    msgDiv.innerHTML = `⚠️ 미완성 (${filledChoices.length}/${selections.length} 과목 지정됨)`;
     msgDiv.style.color = "#d97706";
   } else if(finalTotal < 192) {
     msgDiv.innerHTML = `❌ 학점 부족 (총 ${finalTotal}학점 / 졸업 기준 192학점 미달)`;
     msgDiv.style.color = "#dc2626";
   } else {
-    msgDiv.innerHTML = `✅ 이수 성공! 졸업 조건 만족 (총 ${finalTotal}학점 이수 확정)`;
+    msgDiv.innerHTML = `✅ 졸업 조건 만족! (총 ${finalTotal}학점 이수 확정)`;
     msgDiv.style.color = "#10b981";
   }
 }
@@ -439,9 +538,9 @@ function calcStats() {
 function saveJSON() {
   const studentData = {
     학교명: "영파여자고등학교",
-    학년: 1,
-    반: document.getElementById("className").value,
-    번호: document.getElementById("studentNum").value,
+    학년: document.getElementById("gradeSelect").value,
+    반: document.getElementById("classSelect").value,
+    번호: document.getElementById("numSelect").value,
     이름: document.getElementById("studentName").value,
     희망학과계열: document.getElementById("app-category").value + " -> " + document.getElementById("app-dept").value,
     진로희망사유: document.getElementById("careerPath").value,
@@ -451,7 +550,7 @@ function saveJSON() {
   const blob = new Blob([JSON.stringify(studentData, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `영파여고_1학년_교육과정설계서_${studentData.이름 || '미입력'}.json`;
+  a.download = `영파여고_교육과정설계서_${studentData.이름 || '미입력'}.json`;
   a.click();
 }
 </script>
